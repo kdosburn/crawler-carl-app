@@ -1,16 +1,16 @@
 import streamlit as st
 import os
-import nltk
 import re
+import nltk
 
-# Make sure punkt tokenizer is available
+# Download tokenizer if not already present
 nltk.download('punkt', quiet=True)
 
-# Load all text files from "texts" folder
+# Load and sort text files
 TEXT_FOLDER = "texts"
-files = [f for f in os.listdir(TEXT_FOLDER) if f.endswith(".txt")]
+files = sorted([f for f in os.listdir(TEXT_FOLDER) if f.endswith(".txt")])
 
-def search_texts(query, window=500):
+def search_texts(query, window=50):
     """Search all text files for query and return snippets with context."""
     results = []
     pattern = re.compile(re.escape(query), re.IGNORECASE)
@@ -24,14 +24,27 @@ def search_texts(query, window=500):
                 results.append((filename, snippet))
     return results
 
-# Streamlit UI
 st.title("Search My Text Files")
-query = st.text_input("Enter a search term:")
 
-if st.button("Search") and query:
-    results = search_texts(query)
+# Context slider
+context_chars = st.slider("Context characters", 20, 300, 50, step=10)
+
+# Search input (ENTER will auto-run because Streamlit reruns on change)
+search = st.text_input("Enter a search term and press Enter:")
+
+# Also provide a button to run search manually
+run_search = st.button("Search") or search  # True if button clicked OR there's text
+
+if run_search and search:
+    results = search_texts(search, window=context_chars)
     if results:
         for fname, snippet in results:
-            st.markdown(f"**{fname}:** …{snippet}…")
+            # Highlight the search term in the snippet
+            highlighted = re.sub(
+                f"(?i)({re.escape(search)})",
+                r"<mark>\1</mark>",
+                snippet,
+            )
+            st.markdown(f"**{fname}:** …{highlighted}…", unsafe_allow_html=True)
     else:
         st.write("No matches found.")
