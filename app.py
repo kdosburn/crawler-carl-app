@@ -27,7 +27,7 @@ def search_texts(query, window=50):
 st.title("Search My Text Files")
 
 # Context slider
-context_chars = st.slider("Context characters", 20, 300, 50, step=10)
+context_chars = st.slider("Context characters", 20, 1000, 200, step=10)
 
 # Search input (ENTER will auto-run because Streamlit reruns on change)
 search = st.text_input("Enter a search term and press Enter:")
