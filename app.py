@@ -47,7 +47,7 @@ def search_texts(query, window=50):
 st.title("Search My Text Files")
 
 # Slider for context size
-context_chars = st.slider("Context characters", 20, 300, 50, step=10)
+context_chars = st.slider("Context characters", 20, 1000, 50, step=10)
 
 # Text input (press Enter to search)
 search = st.text_input("Enter a search term and press Enter:")
