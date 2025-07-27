@@ -10,7 +10,7 @@ nltk.download('punkt', quiet=True)
 TEXT_FOLDER = "texts"
 files = [f for f in os.listdir(TEXT_FOLDER) if f.endswith(".txt")]
 
-def search_texts(query, window=200):
+def search_texts(query, window=500):
     """Search all text files for query and return snippets with context."""
     results = []
     pattern = re.compile(re.escape(query), re.IGNORECASE)
