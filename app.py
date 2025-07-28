@@ -3,6 +3,16 @@ import os
 import re
 import nltk
 
+BOOK_TITLES = {
+    "CARL_01.txt": "Dungeon Crawler Carl",
+    "CARL_02.txt": "Carl's Doomsday Scenario",
+    "CARL_03.txt": "The Dungeon Anarchist's Cookbook",
+    "CARL_04.txt": "The Gate of the Feral Gods",
+    "CARL_05.txt": "The Butcher's Masquerade",
+    "CARL_06.txt": "The Eye of the Bedlam Bride",
+    "CARL_07.txt": "This Inevitable Ruin",
+}
+
 # Download tokenizer if not already present
 nltk.download('punkt', quiet=True)
 
@@ -71,6 +81,9 @@ if run_search and search:
                 r"<mark>\1</mark>",
                 snippet,
             )
-            st.markdown(f"**{fname}:** …{highlighted}…", unsafe_allow_html=True)
+            title = BOOK_TITLES.get(fname, fname)
+            st.markdown(f"**{title}:**")
+            st.markdown(f"…{highlighted}…", unsafe_allow_html=True)
+            st.divider()
     else:
         st.write("No matches found.")
