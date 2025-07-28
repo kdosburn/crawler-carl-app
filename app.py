@@ -10,8 +10,8 @@ nltk.download('punkt', quiet=True)
 TEXT_FOLDER = "texts"
 files = sorted([f for f in os.listdir(TEXT_FOLDER) if f.endswith(".txt")])
 
-def search_texts(query, window=50):
-    """Search all text files for query and return merged snippets with context."""
+def search_texts(query, window=200):
+    """Search all books for query and return merged snippets with context."""
     results = []
     pattern = re.compile(re.escape(query), re.IGNORECASE)
 
@@ -44,10 +44,16 @@ def search_texts(query, window=50):
 
     return results
 
-st.title("Search My Text Files")
+st.title("Dungeon Crawler Carl Crawler")
+st.markdown(
+    "### All text credit goes to the brilliant "
+    "[Matt Dinniman](https://mattdinniman.com/)",
+    unsafe_allow_html=False
+)
+
 
 # Slider for context size
-context_chars = st.slider("Context characters", 20, 1000, 50, step=10)
+context_chars = st.slider("Context characters", 20, 1000, 200, step=10)
 
 # Text input (press Enter to search)
 search = st.text_input("Enter a search term and press Enter:")
