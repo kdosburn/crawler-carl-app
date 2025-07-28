@@ -56,7 +56,7 @@ st.markdown(
 context_chars = st.slider("Context characters", 20, 1000, 200, step=10)
 
 # Text input (press Enter to search)
-search = st.text_input("Enter a search term and press Enter:")
+search = st.text_input("Enter a search term or phrase (ex: 'goddamnit, donut') and press Enter:")
 
 # Button also triggers search
 run_search = st.button("Search") or search
