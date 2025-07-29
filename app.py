@@ -2,7 +2,16 @@ import streamlit as st
 import os
 import re
 import nltk
+import unicodedata
 
+# Download tokenizer if not already present
+nltk.download('punkt', quiet=True)
+
+# Folder with your .txt files
+TEXT_FOLDER = "texts"
+files = sorted([f for f in os.listdir(TEXT_FOLDER) if f.endswith(".txt")])
+
+# Dictionary for pretty book titles
 BOOK_TITLES = {
     "CARL_01.txt": "Dungeon Crawler Carl",
     "CARL_02.txt": "Carl's Doomsday Scenario",
@@ -13,21 +22,26 @@ BOOK_TITLES = {
     "CARL_07.txt": "This Inevitable Ruin",
 }
 
-# Download tokenizer if not already present
-nltk.download('punkt', quiet=True)
-
-# Folder with your .txt files
-TEXT_FOLDER = "texts"
-files = sorted([f for f in os.listdir(TEXT_FOLDER) if f.endswith(".txt")])
+def normalize_text(s: str) -> str:
+    """Normalize Unicode so smart quotes and dashes don't break search."""
+    s = unicodedata.normalize("NFKD", s)
+    s = s.replace("’", "'").replace("‘", "'")
+    s = s.replace("“", '"').replace("”", '"')
+    s = s.replace("–", "-").replace("—", "-")
+    return s
 
 def search_texts(query, window=200):
     """Search all books for query and return merged snippets with context."""
     results = []
-    pattern = re.compile(re.escape(query), re.IGNORECASE)
+    # Normalize query for matching
+    norm_query = normalize_text(query)
+    pattern = re.compile(re.escape(norm_query), re.IGNORECASE)
 
     for filename in files:
         with open(os.path.join(TEXT_FOLDER, filename), encoding="utf-8") as f:
             text = f.read()
+            # Normalize text for consistent matching
+            text = normalize_text(text)
 
             matches = list(pattern.finditer(text))
             if not matches:
@@ -35,24 +49,22 @@ def search_texts(query, window=200):
 
             i = 0
             while i < len(matches):
-                # Start of this merged snippet
                 start_index = max(0, matches[i].start() - window)
                 end_index = min(len(text), matches[i].end() + window)
 
-                # Merge consecutive matches that fall inside the same window
                 j = i + 1
                 while j < len(matches) and matches[j].start() <= end_index:
-                    # Extend the end of the snippet to include this match
                     end_index = min(len(text), matches[j].end() + window)
                     j += 1
 
                 snippet = text[start_index:end_index].replace("\n", " ")
                 results.append((filename, snippet))
 
-                # Jump ahead to the next non-overlapping group of matches
                 i = j
 
     return results
+
+# --- Streamlit UI ---
 
 st.title("Dungeon Crawler Carl Crawler")
 st.markdown(
@@ -61,11 +73,10 @@ st.markdown(
     unsafe_allow_html=False
 )
 
-
 # Slider for context size
 context_chars = st.slider("Context characters", 20, 1000, 200, step=10)
 
-# Text input (press Enter to search)
+# Search input
 search = st.text_input("Enter a search term or phrase (ex: 'goddamnit, donut') and press Enter:")
 
 # Button also triggers search
@@ -77,7 +88,7 @@ if run_search and search:
         for fname, snippet in results:
             # Highlight search term(s)
             highlighted = re.sub(
-                f"(?i)({re.escape(search)})",
+                f"(?i)({re.escape(normalize_text(search))})",
                 r"<mark>\1</mark>",
                 snippet,
             )
